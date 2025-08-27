@@ -13,7 +13,7 @@
 __author__ = 'JHao'
 
 import re
-from requests import head
+from requests import get
 from util.six import withMetaclass
 from util.singleton import Singleton
 from handler.configHandler import ConfigHandler
@@ -62,8 +62,8 @@ def httpTimeOutValidator(proxy):
     proxies = {"http": "http://{proxy}".format(proxy=proxy), "https": "https://{proxy}".format(proxy=proxy)}
 
     try:
-        r = head(conf.httpUrl, headers=HEADER, proxies=proxies, timeout=conf.verifyTimeout)
-        return True if r.status_code == 200 else False
+        r = get('http://httpbin.org/ip', headers=HEADER, proxies=proxies, timeout=conf.verifyTimeout, verify=False)
+        return True if r.status_code == 200 and r.headers['content-type'].lower().find('application/json') != -1 and r.json()['origin'] else False
     except Exception as e:
         return False
 
@@ -74,8 +74,8 @@ def httpsTimeOutValidator(proxy):
 
     proxies = {"http": "http://{proxy}".format(proxy=proxy), "https": "https://{proxy}".format(proxy=proxy)}
     try:
-        r = head(conf.httpsUrl, headers=HEADER, proxies=proxies, timeout=conf.verifyTimeout, verify=False)
-        return True if r.status_code == 200 else False
+        r = get('https://httpbin.org/ip', headers=HEADER, proxies=proxies, timeout=conf.verifyTimeout, verify=False)
+        return True if r.status_code == 200 and r.headers['content-type'].lower().find('application/json') != -1 and r.json()['origin'] else False
     except Exception as e:
         return False
 
